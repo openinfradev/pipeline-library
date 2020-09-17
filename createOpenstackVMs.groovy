@@ -20,12 +20,12 @@ def getOSParam() {
 	return "--os-auth-url ${osAuthUrl} --os-project-name ${osProjectName} --os-user-domain-name ${osUserDomainName} --os-project-domain-name ${osProjectDomainName} --os-region-name ${osRegionName}"
 }
 
-def waitVolumeAvailable(String volName) {
+def waitVolumeAvailable(String volName, String provider='taco-prod') {
   WAIT_THRESHOLD=20
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
     t = 0
-    volStatus = sh(returnStdout: true, script: "openstack volume list --os-cloud taco-prod | grep ${volName}").trim()
+    volStatus = sh(returnStdout: true, script: "openstack volume list --os-cloud ${provider} | grep ${volName}").trim()
     println("${volStatus}")
     if (volStatus.contains("error")) {
       error("Volume is an error status. Job is cancelled.")
@@ -44,12 +44,12 @@ def waitVolumeAvailable(String volName) {
   }
 }
 
-def waitVMActive(String vmName) {
+def waitVMActive(String vmName, String provider='taco-prod') {
   WAIT_THRESHOLD=20
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
     t = 0
-    vmStatus = sh(returnStdout: true, script: "openstack server list --os-cloud taco-prod |grep ${vmName}").trim()
+    vmStatus = sh(returnStdout: true, script: "openstack server list --os-cloud ${provider} |grep ${vmName}").trim()
     println("${vmStatus}")
     if (vmStatus.contains("ERROR")) {
       error("VM is an error status. Job is cancelled.")
@@ -69,7 +69,7 @@ def waitVMActive(String vmName) {
 }
 
 
-def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks) {
+def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='taco-prod') {
   fetchCloudsConf()
 
   boolean bySnapshot = false
@@ -105,18 +105,18 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
   }
 
   flavorUuid = sh(returnStdout: true,
-		script: "openstack flavor list --os-cloud taco-prod | grep ${flavor} | awk '{print \$2}'").trim()
+		script: "openstack flavor list --os-cloud ${provider} | grep ${flavor} | awk '{print \$2}'").trim()
 
   firstNetUuid = sh(returnStdout: true,
-	        script: "openstack network list --os-cloud taco-prod | grep ${networks.mgmt} | awk '{print \$2}'").trim()
+	        script: "openstack network list --os-cloud ${provider} | grep ${networks.mgmt} | awk '{print \$2}'").trim()
   println("firstNetUuid: ${firstNetUuid}.")
 
   secondNetUuid = sh(returnStdout: true,
-	        script: "openstack network list --os-cloud taco-prod | grep ${networks.flat} | awk '{print \$2}'").trim()
+	        script: "openstack network list --os-cloud ${provider} | grep ${networks.flat} | awk '{print \$2}'").trim()
   println("secondNetUuid: ${secondNetUuid}.")
 
   thirdNetUuid = sh(returnStdout: true,
-	        script: "openstack network list --os-cloud taco-prod | grep ${networks.vxlan} | awk '{print \$2}'").trim()
+	        script: "openstack network list --os-cloud ${provider} | grep ${networks.vxlan} | awk '{print \$2}'").trim()
   println("thirdNetUuid: ${thirdNetUuid}.")
 
   println("Creating ${cnt} VMs on OpenStack cluster...")
@@ -126,7 +126,7 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
 
   if (bySnapshot == false ) {
     imageUuid = sh(returnStdout: true,
-        script: "openstack image list --os-cloud taco-prod | grep ${imageName} | awk '{print \$2}'").trim()
+        script: "openstack image list --os-cloud ${provider} | grep ${imageName} | awk '{print \$2}'").trim()
     println("imageUuid: ${imageUuid}")
   }
 
@@ -137,7 +137,7 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
     if (bySnapshot == false ) {
 
       rootVolumeUuid = sh(returnStdout: true,
-      script: "openstack volume create --os-cloud taco-prod --image ${imageUuid} --bootable --type rbd2 --size 160 -f value -c id ${vmName}").trim()
+      script: "openstack volume create --os-cloud ${provider} --image ${imageUuid} --bootable --type rbd2 --size 160 -f value -c id ${vmName}").trim()
       println("rootVolumeUuid: ${rootVolumeUuid}")
 
       bdm = "--block-device source=volume,id=${rootVolumeUuid},dest=volume,size=160,shutdown=${bdmShutdown},bootindex=0"
@@ -145,16 +145,16 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
         volName = vmName + "-vol-" + (index+1).toString()
 
         println("Creating volume ${volName}...")
-        volUuid = sh(returnStdout: true,script: "openstack volume create --os-cloud taco-prod --type rbd2 --size ${it} -f value -c id ${volName}").trim()
+        volUuid = sh(returnStdout: true,script: "openstack volume create --os-cloud ${provider} --type rbd2 --size ${it} -f value -c id ${volName}").trim()
 
         bootindex = index+1
         bdm += " --block-device source=volume,id=${volUuid},dest=volume,size=${it},shutdown=${bdmShutdown},bootindex=${bootindex}"
       }
 
-      waitVolumeAvailable(vmName)
+      waitVolumeAvailable(vmName, provider)
     } else {
       snapshotUuid = sh(returnStdout: true,
-        script: "openstack volume snapshot list --os-cloud taco-prod | grep ${imageName} | awk '{print \$2}' | head -1").trim()
+        script: "openstack volume snapshot list --os-cloud ${provider} | grep ${imageName} | awk '{print \$2}' | head -1").trim()
       println("snapshotUuid: ${snapshotUuid}")
       bdm = "--block-device source=snapshot,id=${snapshotUuid},dest=volume,size=160,shutdown=${bdmShutdown},bootindex=0"
     }
@@ -163,6 +163,6 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
     UserParam = getUserParam()
     sh "nova ${osParam} --os-username ${userParam['osUsername']} --os-password \'${userParam['osPassword']}\' boot ${bdm} --flavor ${flavorUuid} --nic net-id=${firstNetUuid} --nic net-id=${secondNetUuid} --nic net-id=${thirdNetUuid} --key-name jenkins ${vmName} --security-group ${securityGroup} --availability-zone ${availabilityZone} ${userData} ${confDriveParam}"
   }
-  waitVMActive(name)
+  waitVMActive(name, provider)
   return name
 }
