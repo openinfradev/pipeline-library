@@ -4,15 +4,20 @@ def generateRandom() {
 	return org.apache.commons.lang.RandomStringUtils.randomAlphabetic(6).toLowerCase()
 }
 
-def getOSParam() {
-  osAuthUrl = sh(returnStdout: true, script: "cat clouds.yaml | grep auth_url | cut -d':' -f2-").trim()
-	osProjectName = sh(returnStdout: true, script: "cat clouds.yaml | grep project_name | cut -d':' -f2-").trim()
+def getUserParam() {
+	def UserMap = [:]
 	osUsername = sh(returnStdout: true, script: "cat clouds.yaml | grep username | cut -d':' -f2-").trim()
 	osPassword = sh(returnStdout: true, script: "cat clouds.yaml | grep password | cut -d':' -f2-").trim()
+	return UserMap
+}
+
+def getOSParam() {
+	osAuthUrl = sh(returnStdout: true, script: "cat clouds.yaml | grep auth_url | cut -d':' -f2-").trim()
+	osProjectName = sh(returnStdout: true, script: "cat clouds.yaml | grep project_name | cut -d':' -f2-").trim()
 	osUserDomainName = sh(returnStdout: true, script: "cat clouds.yaml | grep user_domain_name | cut -d':' -f2-").trim()
 	osProjectDomainName = sh(returnStdout: true, script: "cat clouds.yaml | grep project_domain_name | cut -d':' -f2-").trim()
 	osRegionName = sh(returnStdout: true, script: "cat clouds.yaml | grep region_name | cut -d':' -f2-").trim()
-  return "--os-auth-url ${osAuthUrl} --os-project-name ${osProjectName} --os-username ${osUsername} --os-password ${osPassword} --os-user-domain-name ${osUserDomainName} --os-project-domain-name ${osProjectDomainName} --os-region-name ${osRegionName}"
+	return "--os-auth-url ${osAuthUrl} --os-project-name ${osProjectName} --os-user-domain-name ${osUserDomainName} --os-project-domain-name ${osProjectDomainName} --os-region-name ${osRegionName}"
 }
 
 def waitVolumeAvailable(String volName) {
@@ -155,7 +160,8 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
     }
 
     osParam = getOSParam()
-    sh "nova ${osParam} boot ${bdm} --flavor ${flavorUuid} --nic net-id=${firstNetUuid} --nic net-id=${secondNetUuid} --nic net-id=${thirdNetUuid} --key-name jenkins ${vmName} --security-group ${securityGroup} --availability-zone ${availabilityZone} ${userData} ${confDriveParam}"
+    UserParam = getUserParam()
+    sh "nova ${osParam} --os-username ${userParam['osUsername']} --os-password \'${userParam['osPassword']}\' boot ${bdm} --flavor ${flavorUuid} --nic net-id=${firstNetUuid} --nic net-id=${secondNetUuid} --nic net-id=${thirdNetUuid} --key-name jenkins ${vmName} --security-group ${securityGroup} --availability-zone ${availabilityZone} ${userData} ${confDriveParam}"
   }
   waitVMActive(name)
   return name
