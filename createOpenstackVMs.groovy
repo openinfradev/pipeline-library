@@ -6,8 +6,8 @@ def generateRandom() {
 
 def getUserParam() {
 	def UserMap = [:]
-	osUsername = sh(returnStdout: true, script: "cat clouds.yaml | grep username | cut -d':' -f2-").trim()
-	osPassword = sh(returnStdout: true, script: "cat clouds.yaml | grep password | cut -d':' -f2-").trim()
+	userMap['osUsername'] = sh(returnStdout: true, script: "cat clouds.yaml | grep username | cut -d':' -f2-").trim()
+	userMap['osPassword'] = sh(returnStdout: true, script: "cat clouds.yaml | grep password | cut -d':' -f2-").trim()
 	return UserMap
 }
 
