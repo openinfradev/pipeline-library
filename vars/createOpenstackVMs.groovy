@@ -5,10 +5,10 @@ def generateRandom() {
 }
 
 def getUserParam() {
-	def UserMap = [:]
+	def userMap = [:]
 	userMap['osUsername'] = sh(returnStdout: true, script: "cat clouds.yaml | grep username | cut -d':' -f2-").trim()
 	userMap['osPassword'] = sh(returnStdout: true, script: "cat clouds.yaml | grep password | cut -d':' -f2-").trim()
-	return UserMap
+	return userMap
 }
 
 def getOSParam() {
@@ -160,9 +160,12 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
       bdm = "--block-device source=snapshot,id=${snapshotUuid},dest=volume,size=160,shutdown=${bdmShutdown},bootindex=0"
     }
 
+    println("Debugging clouds.yaml..")
+    sh "cat clouds.yaml"
+
     osParam = getOSParam()
     UserParam = getUserParam()
-    sh "nova ${osParam} --os-username ${userParam['osUsername']} --os-password \'${userParam['osPassword']}\' boot ${bdm} --flavor ${flavorUuid} --nic net-id=${firstNetUuid} --nic net-id=${secondNetUuid} --nic net-id=${thirdNetUuid} --key-name jenkins ${vmName} --security-group ${securityGroup} --availability-zone ${availabilityZone} ${userData} ${confDriveParam}"
+    sh "nova ${osParam} --os-username ${userParam['osUsername']} --os-password \'${userParam['osPassword']}\' boot ${bdm} --flavor ${flavorUuid} --nic net-id=${firstNetUuid} --nic net-id=${secondNetUuid} --nic net-id=${thirdNetUuid} --key-name jenkins-slave-hanukey ${vmName} --security-group ${securityGroup} --availability-zone ${availabilityZone} ${userData} ${confDriveParam}"
   }
   waitVMActive(name, provider)
   return name
