@@ -70,22 +70,23 @@ def waitVMActive(String vmName, String provider='taco-prod') {
 
 
 def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='taco-prod') {
-  fetchCloudsConf()
+  // fetchCloudsConf()
 
   boolean bySnapshot = false
-  // FIXME: replace image names based on your openstack env
-	if(image=="centos7") {
-	  imageName = "CentOS-7-x86_64-2003.raw"
-	} else if (image=="centos8") {
-	  imageName = "Centos8.0.1905-dev"
-	} else if (image=="ubuntu") {
-	  imageName = "Ubuntu-18.04-Bionic.raw"
-	} else {
-	  imageName = image
+    if(image=="centos7") {
+      // imageName = "CentOS-7-x86_64-2003.raw"
+      imageName = "centos7"
+    } else if (image=="centos8") {
+      // imageName = "Centos8.0.1905-dev"
+      imageName = "centos8"
+    } else if (image=="ubuntu") {
+      // imageName = "Ubuntu-18.04-Bionic.raw"
+      imageName = "ubuntu"
+    } else {
+      imageName = image
     bySnapshot = true
-	}
-	name = namePrefix + "-" + generateRandom()
-
+    }
+    name = namePrefix + "-" + generateRandom()
 
   if (userData != "")
 	  userData = "--user-data ${userData}"
