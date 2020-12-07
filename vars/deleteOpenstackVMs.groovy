@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(String namePrefix, String provider) {
+def call(String namePrefix, String nameKey, String provider) {
   println("Start deleting Openstack VMs...")
   fetchCloudsConf()
 	sh """
@@ -12,4 +12,15 @@ def call(String namePrefix, String provider) {
     fi
   """
   println("Deleting Openstack VM has been finished!")
+
+  // Delete vmName from etcd
+  values = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get ${nameKey}").trim()
+  if (values[0].contains("vmName") && values[1]) {
+    print("Retrieved vmName: ${values[1]} from key: ${values[0]}")
+    ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} del ${nameKey}").trim()
+  } else {
+    error("Error deleting k8s VM name from etcd. Failed to get specified key.")
+  }
+
 }
+
