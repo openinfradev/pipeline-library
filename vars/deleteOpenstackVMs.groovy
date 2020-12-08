@@ -14,7 +14,7 @@ def call(String namePrefix, String nameKey, String provider) {
   println("Deleting Openstack VM has been finished!")
 
   // Delete vmName from etcd
-  values = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get ${nameKey}").trim()
+  values = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get ${nameKey}").trim().split('\n')
   if (values[0].contains("vmName") && values[1]) {
     print("Retrieved vmName: ${values[1]} from key: ${values[0]}")
     ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} del ${nameKey}").trim()
