@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonSlurper
 
 def call(String prefix) {
   output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
@@ -6,8 +7,8 @@ def call(String prefix) {
   def slurper = new JsonSlurper()
   def result = slurper.parseText(output)
 
-  vmKey = result.kvs[0].key.decodeBase64()
-  vmVal = result.kvs[0].value.decodeBase64()
+  vmKey = new String(result.kvs[0].key.decodeBase64())
+  vmVal = new String(result.kvs[0].value.decodeBase64())
 
   // check if retrieved key is correct
   if (vmKey.startsWith(prefix) && vmVal ) {
