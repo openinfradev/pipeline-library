@@ -1,5 +1,4 @@
 #!/usr/bin/env groovy
-//import groovy.json.JsonSlurperClassic
 
 def call(String prefix, String provider) {
     // Get VM list from openstack
@@ -11,27 +10,22 @@ def call(String prefix, String provider) {
 
     def result = readJSON text: output
 
-    //def slurper = new JsonSlurperClassic()
-    //def result = slurper.parseText(output)
-
-    //Show result.kvs.size?
-
     result.kvs.each{
       vmKey = new String(it.key.decodeBase64())
       vmVal = new String(it.value.decodeBase64())
 
-      println("Checking entry ${vmVal}...")
+      println("Checking entry '${vmVal}'...")
       if ( !servers.contains(vmVal) ) {
-        println("Found dangling endpoint. Deleting it...")
-        ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} del ${vmKey}")
+        println("Confirmed as dangling endpoint. Deleting it...")
+        ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} del ${vmKey}").trim()
         if(ret.toString() == 0) {
           error("Something went wrong.. No data deleted..")
         } else {
-          println("${ret.toString()} keys have been deleted..")
+          println("${ret.toString()} key(s) have been deleted..")
         }
 
       } else {
-        println("Found endpoint in server list.")
+        println("Found in server list.")
       }
     }
 }

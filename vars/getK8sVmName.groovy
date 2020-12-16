@@ -1,11 +1,9 @@
 #!/usr/bin/env groovy
-import groovy.json.JsonSlurperClassic
 
 def call(String prefix) {
   output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
 
-  def slurper = new JsonSlurperClassic()
-  def result = slurper.parseText(output)
+  def result = readJSON text: output
 
   vmKey = new String(result.kvs[0].key.decodeBase64())
   vmVal = new String(result.kvs[0].value.decodeBase64())
