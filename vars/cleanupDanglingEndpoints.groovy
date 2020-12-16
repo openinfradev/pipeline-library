@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-import groovy.json.JsonSlurperClassic
+//import groovy.json.JsonSlurperClassic
 
 def call(String prefix, String provider) {
     // Get VM list from openstack
@@ -9,8 +9,10 @@ def call(String prefix, String provider) {
     // Get k8s endpoint list from etcd
     output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
 
-    def slurper = new JsonSlurperClassic()
-    def result = slurper.parseText(output)
+    def result = readJSON text: output
+
+    //def slurper = new JsonSlurperClassic()
+    //def result = slurper.parseText(output)
 
     //Show result.kvs.size?
 
