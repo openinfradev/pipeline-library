@@ -4,6 +4,9 @@ def call(String prefix) {
   output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
 
   def result = readJSON text: output
+  if (!result.kvs) {
+    error("No k8s endpoints registered in etcd. Exiting job..")
+  }
 
   vmKey = new String(result.kvs[0].key.decodeBase64())
   vmVal = new String(result.kvs[0].value.decodeBase64())
