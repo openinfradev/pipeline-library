@@ -21,7 +21,7 @@ def getOSParam() {
 }
 
 def waitVolumeAvailable(String volName, String provider='taco-prod') {
-  WAIT_THRESHOLD=20
+  WAIT_THRESHOLD=30
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
     t = 0
@@ -45,7 +45,7 @@ def waitVolumeAvailable(String volName, String provider='taco-prod') {
 }
 
 def waitVMActive(String vmName, String provider='taco-prod') {
-  WAIT_THRESHOLD=20
+  WAIT_THRESHOLD=30
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
     t = 0
