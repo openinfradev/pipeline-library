@@ -73,15 +73,17 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
   // fetchCloudsConf()
 
   boolean bySnapshot = false
+    // Currently, images names are set to those in pangyo openstack env.
+    // So, these need to be reverted when OSC env is recovered
     if(image=="centos7") {
-      // imageName = "CentOS-7-x86_64-2003.raw"
-      imageName = "centos7"
+      imageName = "CentOS-7-x86_64-2003.raw"
+      //imageName = "centos7"
     } else if (image=="centos8") {
-      // imageName = "Centos8.0.1905-dev"
-      imageName = "centos8"
+      imageName = "Centos8.0.1905-dev"
+      //imageName = "centos8"
     } else if (image=="ubuntu") {
-      // imageName = "Ubuntu-18.04-Bionic.raw"
-      imageName = "ubuntu"
+      imageName = "Ubuntu-18.04-Bionic.raw"
+      //imageName = "ubuntu"
     } else {
       imageName = image
     bySnapshot = true
