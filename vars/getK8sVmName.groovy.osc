@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 def call(String prefix) {
-  output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} get --prefix ${prefix} -w json").trim()
+  output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
 
   def result = readJSON text: output
   if (!result.kvs) {
