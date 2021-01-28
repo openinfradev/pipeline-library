@@ -12,7 +12,7 @@ def call(String prefix, String provider) {
     println("Servers: ${servers}")
 
     // Get k8s endpoint list from etcd
-    output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} get --prefix ${prefix} -w json").trim()
+    output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} get --prefix ${prefix} -w json").trim()
 
     def result = readJSON text: output
 
@@ -23,7 +23,7 @@ def call(String prefix, String provider) {
       println("Checking entry '${vmVal}'...")
       if ( !servers.contains(vmVal) ) {
         println("Confirmed as dangling endpoint. Deleting it...")
-        ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} del ${vmKey}").trim()
+        ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL} del ${vmKey}").trim()
         if(ret.toString() == 0) {
           error("Something went wrong.. No data deleted..")
         } else {
