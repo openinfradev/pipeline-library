@@ -1,6 +1,12 @@
 #!/usr/bin/env groovy
 
 def call(String prefix, String provider) {
+    // Fetch clouds conf
+    sh """
+      git clone https://github.com/openinfradev/taco-gate-inventories.git
+      cp taco-gate-inventories/config/pangyo-clouds.yml ./clouds.yaml
+    """
+
     // Get VM list from openstack
     servers = sh(returnStdout: true, script: "openstack server list --os-cloud ${provider} -f json | jq --raw-output 'sort_by(.Name) | .[] | select(.Name|test(\"gate-centos-lb-ceph-online\")) | .Name'").trim().split()
     println("Servers: ${servers}")
