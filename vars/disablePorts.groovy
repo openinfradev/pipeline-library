@@ -1,6 +1,5 @@
 #!/usr/bin/env groovy
 def call(Map<String,String> vmIPs, String provider) {
-  fetchCloudsConf()
   vmIPs.each { name, net_ip ->
     port_id = sh(returnStdout: true,
                  script: "openstack port list --os-cloud ${provider} | grep \\'${net_ip}\\' | awk -F \"|\" '{ print \$2 }'")

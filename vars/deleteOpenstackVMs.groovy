@@ -2,7 +2,6 @@
 
 def call(String namePrefix, String nameKey, String provider) {
   println("Start deleting Openstack VMs...")
-  fetchCloudsConf()
 	sh """
 		openstack server list --os-cloud ${provider} | grep ${namePrefix} | awk '{print \$2}' | xargs openstack server delete --os-cloud ${provider} --wait
     VOL_CNT=\$(openstack volume list --os-cloud ${provider} -f value | grep ${namePrefix} | wc -l)
