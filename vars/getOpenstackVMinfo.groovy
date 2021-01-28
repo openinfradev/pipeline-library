@@ -3,9 +3,11 @@ def call(String namePrefix, String networkType="mgmt", String provider='taco-pro
   println("Fetching ${networkType} network info for ${namePrefix}...")
 
 	def result = [:]
-	infos = sh(returnStdout: true, script: "openstack server list --os-cloud ${provider} -f json | jq --raw-output 'sort_by(.Name) | .[] | select(.Name|test(\"${namePrefix}\")) | .Name, .Networks'").split('\n')
-	print infos
-  if (infos) {
+	infoStr = sh(returnStdout: true, script: "openstack server list --os-cloud ${provider} -f json | jq --raw-output 'sort_by(.Name) | .[] | select(.Name|test(\"${namePrefix}\")) | .Name, .Networks'")
+  println("Found VM info: ${infoStr}")
+
+  if (infoStr) {
+    infos = infoStr.split('\n')
     for (i = 0; i < infos.size(); i=i+2) {
       infos[i+1].split(";").each { it ->
         if(it.contains(networkType)) {
