@@ -20,7 +20,7 @@ def getOSParam() {
 	return "--os-auth-url ${osAuthUrl} --os-project-name ${osProjectName} --os-user-domain-name ${osUserDomainName} --os-project-domain-name ${osProjectDomainName} --os-region-name ${osRegionName}"
 }
 
-def waitVolumeAvailable(String volName, String provider='taco-prod') {
+def waitVolumeAvailable(String volName, String provider='openstack-pangyo') {
   WAIT_THRESHOLD=30
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
@@ -44,7 +44,7 @@ def waitVolumeAvailable(String volName, String provider='taco-prod') {
   }
 }
 
-def waitVMActive(String vmName, String provider='taco-prod') {
+def waitVMActive(String vmName, String provider='openstack-pangyo') {
   WAIT_THRESHOLD=30
   WAIT_INTERVAL=5
   for (i=1; i<WAIT_THRESHOLD; i++) {
@@ -69,7 +69,7 @@ def waitVMActive(String vmName, String provider='taco-prod') {
 }
 
 
-def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='taco-prod') {
+def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='openstack-pangyo') {
   // fetchCloudsConf()
 
   boolean bySnapshot = false
