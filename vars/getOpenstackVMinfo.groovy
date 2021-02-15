@@ -12,6 +12,9 @@ def call(String namePrefix, String networkType="mgmt", String provider='openstac
       infos[i+1].split(";").each { it ->
         if(it.contains(networkType)) {
           ip = it.split("=")[-1]
+          if(ip.contains(',') {
+            ip = ip.split(',')[0]
+          }
           result[infos[i]] = ip
         }
       }
