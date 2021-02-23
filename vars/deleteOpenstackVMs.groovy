@@ -29,24 +29,23 @@ def call(String namePrefix, String nameKey, String provider) {
     output = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} get --prefix k8s_endpoint -w json").trim()
     def result = readJSON text: output
     if (!result.kvs) {
-      error("Error occurred while finding vmName to delete. No k8s endpoints registered in etcd. Exiting job..")
-    }
+      println("No k8s endpoints registered in etcd.")
+    } else {
+      foundNameKey = ""
+      result.kvs.each { item ->
+        vmKey = new String(item.key.decodeBase64())
+        vmVal = new String(item.value.decodeBase64())
+        if (vmVal == namePrefix) {
+          println("Found vmName: ${vmVal}")
+          foundNameKey = vmKey
+          println("Found vmKey from vmName: ${vmKey}")
 
-    foundNameKey = ""
-    result.kvs.each { item ->
-      vmKey = new String(item.key.decodeBase64())
-      vmVal = new String(item.value.decodeBase64())
-      if (vmVal == namePrefix) {
-        println("Found vmName: ${vmVal}")
-        foundNameKey = vmKey
-        println("Found vmKey from vmName: ${vmKey}")
-
-        ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} del ${foundNameKey}").trim()
+          ret = sh(returnStdout: true, script: "etcdctl --endpoints ${env.ETCD_URL_PANGYO} del ${foundNameKey}").trim()
+        }
       }
-    }
-    if (!foundNameKey) {
-      println("Failed to delete namePrefix from etcd.. VM name not found")
-
+      if (!foundNameKey) {
+        println("Failed to delete namePrefix from etcd.. VM name not found")
+      }
     }
   }
 }
