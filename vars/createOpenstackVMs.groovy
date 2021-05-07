@@ -69,7 +69,7 @@ def waitVMActive(String vmName, String provider='openstack-pangyo') {
 }
 
 
-def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='openstack-pangyo') {
+def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", Integer cnt=1, String volType="rbd1", List volSize = [], String userData = "", Map<String,String> configDriveFiles=null, String securityGroup = "default", String availabilityZone = "nova", boolean online=false, boolean deleteBdm=true, Map<String,String> networks, String provider='openstack-pangyo') {
   // fetchCloudsConf()
 
   boolean bySnapshot = false
@@ -140,7 +140,7 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
     if (bySnapshot == false ) {
 
       rootVolumeUuid = sh(returnStdout: true,
-      script: "openstack volume create --os-cloud ${provider} --image ${imageUuid} --bootable --type rbd1 --size 160 -f value -c id ${vmName}").trim()
+      script: "openstack volume create --os-cloud ${provider} --image ${imageUuid} --bootable --type ${volType} --size 160 -f value -c id ${vmName}").trim()
       println("rootVolumeUuid: ${rootVolumeUuid}")
 
       bdm = "--block-device source=volume,id=${rootVolumeUuid},dest=volume,size=160,shutdown=${bdmShutdown},bootindex=0"
@@ -148,7 +148,7 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
         volName = vmName + "-vol-" + (index+1).toString()
 
         println("Creating volume ${volName}...")
-        volUuid = sh(returnStdout: true,script: "openstack volume create --os-cloud ${provider} --type rbd1 --size ${it} -f value -c id ${volName}").trim()
+        volUuid = sh(returnStdout: true,script: "openstack volume create --os-cloud ${provider} --type ${volType} --size ${it} -f value -c id ${volName}").trim()
 
         bootindex = index+1
         bdm += " --block-device source=volume,id=${volUuid},dest=volume,size=${it},shutdown=${bdmShutdown},bootindex=${bootindex}"
