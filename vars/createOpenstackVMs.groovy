@@ -140,7 +140,7 @@ def call(String namePrefix, String image="centos7", String flavor="m1.xlarge", I
     if (bySnapshot == false ) {
 
       rootVolumeUuid = sh(returnStdout: true,
-      script: "openstack volume create --os-cloud ${provider} --image ${imageUuid} --bootable --type ${volType} --size 160 -f value -c id ${vmName}").trim()
+      script: "openstack volume create --os-cloud ${provider} --image ${imageUuid} --bootable --type rbd2 --size 160 -f value -c id ${vmName}").trim()
       println("rootVolumeUuid: ${rootVolumeUuid}")
 
       bdm = "--block-device source=volume,id=${rootVolumeUuid},dest=volume,size=160,shutdown=${bdmShutdown},bootindex=0"
